@@ -1,35 +1,12 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Chatbot Legal México</title>
-  <style>
-    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
-    textarea { width: 100%; height: 80px; }
-    button { padding: 10px 20px; margin-top: 10px; }
-    pre { white-space: pre-wrap; background: #fff; padding: 15px; }
-  </style>
-</head>
-<body>
+const express = require("express");
+const cors = require("cors");
 
-<h2>⚖️ Chatbot Legal (México)</h2>
-<p><strong>Uso educativo. No sustituye asesoría legal.</strong></p>
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-<textarea id="input" placeholder="Describe el caso con estado y edad..."></textarea>
-<br>
-<button onclick="enviar()">Enviar</button>
-
-<pre id="respuesta"></pre>
-
-<script>
-function enviar() {
-  const input = document.getElementById("input").value.toLowerCase();
-  const out = document.getElementById("respuesta");
-
-  if (!input.trim()) {
-    out.innerText = "⚠️ Describe un caso para analizar.";
-    return;
-  }
+app.post("/chat", (req, res) => {
+  const input = (req.body.pregunta || "").toLowerCase();
 
   /* =========================
      ESTADOS
@@ -39,8 +16,8 @@ function enviar() {
     "ciudad de mexico": "Ciudad de México",
     "jalisco": "Jalisco",
     "nuevo leon": "Nuevo León",
-    "edomex": "Estado de México",
     "estado de mexico": "Estado de México",
+    "edomex": "Estado de México",
     "puebla": "Puebla",
     "queretaro": "Querétaro",
     "guanajuato": "Guanajuato",
@@ -75,7 +52,8 @@ function enviar() {
   if (
     input.includes("robo") || input.includes("robe") ||
     input.includes("arma") || input.includes("lesion") ||
-    input.includes("matar") || input.includes("amenaza")
+    input.includes("matar") || input.includes("amenaza") ||
+    input.includes("fraude") || input.includes("extorsion")
   ) materia = "PENAL";
 
   if (
@@ -94,19 +72,20 @@ function enviar() {
   ) materia = "TRÁNSITO";
 
   /* =========================
-     DELITO / ASUNTO
+     DELITO
   ========================= */
   let delito = "No determinado";
 
   if (input.includes("robo") && input.includes("arma")) delito = "Robo con violencia";
-  else if (input.includes("robo") || input.includes("robe")) delito = "Robo simple";
-  else if (input.includes("vehiculo") || input.includes("carro")) delito = "Robo de vehículo";
-  else if (input.includes("lesion") || input.includes("golpe")) delito = "Lesiones";
+  else if (input.includes("carro") || input.includes("vehiculo")) delito = "Robo de vehículo";
+  else if (input.includes("robo")) delito = "Robo simple";
+  else if (input.includes("lesion")) delito = "Lesiones";
   else if (input.includes("matar") || input.includes("murio")) delito = "Homicidio";
   else if (input.includes("fraude")) delito = "Fraude";
   else if (input.includes("extorsion")) delito = "Extorsión";
   else if (input.includes("divorcio")) delito = "Divorcio contencioso";
   else if (input.includes("choque")) delito = "Accidente de tránsito";
+  else if (input.includes("allanamiento")) delito = "Allanamiento de morada";
 
   /* =========================
      AGRAVANTES
@@ -122,26 +101,31 @@ function enviar() {
   ========================= */
   let pena = "No es posible estimar sin más datos.";
 
-  if (delito === "Robo simple") {
-    pena = "Prisión aproximada de 6 meses a 4 años y multa (varía por estado).";
-  }
-  if (delito === "Robo con violencia") {
-    pena = "Prisión aproximada de 5 a 15 años; agravantes aumentan la pena.";
-  }
-  if (delito === "Robo de vehículo") {
-    pena = "Prisión aproximada de 5 a 10 años.";
-  }
-  if (delito === "Lesiones") {
-    pena = "Desde multas hasta prisión, según gravedad.";
-  }
-  if (delito === "Homicidio") {
-    pena = "Prisión aproximada de 12 a 30 años.";
-  }
-  if (delito === "Fraude") {
-    pena = "Prisión y multa dependiendo del monto.";
-  }
-  if (delito === "Divorcio contencioso") {
-    pena = "No hay prisión. Puede haber pensión, custodia y bienes.";
+  switch (delito) {
+    case "Robo simple":
+      pena = "Prisión aproximada de 6 meses a 4 años y multa.";
+      break;
+    case "Robo con violencia":
+      pena = "Prisión aproximada de 5 a 15 años.";
+      break;
+    case "Robo de vehículo":
+      pena = "Prisión aproximada de 5 a 10 años.";
+      break;
+    case "Lesiones":
+      pena = "Desde multas hasta prisión, según gravedad.";
+      break;
+    case "Homicidio":
+      pena = "Prisión aproximada de 12 a 30 años.";
+      break;
+    case "Fraude":
+      pena = "Prisión y multa según monto defraudado.";
+      break;
+    case "Divorcio contencioso":
+      pena = "No hay prisión. Puede haber pensión, custodia y reparto de bienes.";
+      break;
+    case "Accidente de tránsito":
+      pena = "Multas, reparación del daño y posible prisión si hubo alcohol o lesiones.";
+      break;
   }
 
   /* =========================
@@ -149,23 +133,24 @@ function enviar() {
   ========================= */
   let queHacer = `
 • Reunir pruebas
-• Evitar confrontaciones
-• Consultar abogado
-• Valorar denuncia o defensa legal
+• No declarar sin abogado
+• Consultar asesoría legal
+• Valorar denuncia o defensa
 `;
 
   /* =========================
      INFO FALTANTE
   ========================= */
   let faltante = [];
-  if (!input.includes("denuncia")) faltante.push("¿Existe denuncia formal?");
-  if (materia === "PENAL" && !input.includes("arma")) faltante.push("¿Se utilizó arma?");
+  if (estado === "No detectado") faltante.push("Estado de la República");
+  if (edad === "No indicada") faltante.push("Edad");
+  if (!input.includes("denuncia")) faltante.push("¿Existe denuncia?");
+  if (materia === "PENAL" && !input.includes("arma")) faltante.push("¿Hubo arma?");
   if (!input.includes("lesion")) faltante.push("¿Hubo lesiones y qué gravedad?");
   if (delito.includes("Robo") && !input.includes("recuper")) faltante.push("¿Se recuperó el bien?");
-  if (estado === "No detectado") faltante.push("Estado de la República");
 
   /* =========================
-     RESPUESTA FINAL
+     RESPUESTA
   ========================= */
   let respuesta = `⚖️ ANÁLISIS JURÍDICO INTEGRAL (FINES EDUCATIVOS)
 
@@ -194,9 +179,9 @@ ${faltante.length ? faltante.map(f => "• " + f).join("\n") : "• Información
 Uso educativo. No sustituye asesoría legal profesional.
 `;
 
-  out.innerText = respuesta;
-}
-</script>
+  res.json({ respuesta });
+});
 
-</body>
-</html>
+app.listen(3000, () => {
+  console.log("Chatbot legal activo en http://localhost:3000");
+});
