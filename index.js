@@ -1,11 +1,7 @@
-const express = require("express");
-const cors = require("cors");
+const input = document.getElementById("input");
+const output = document.getElementById("output");
+const btn = document.getElementById("send");
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// ===== CATÁLOGOS =====
 const estados = [
   "aguascalientes","baja california","baja california sur","campeche",
   "chiapas","chihuahua","cdmx","ciudad de mexico","coahuila","colima",
@@ -15,167 +11,100 @@ const estados = [
   "tabasco","tamaulipas","tlaxcala","veracruz","yucatan","zacatecas"
 ];
 
-// ===== UTILIDADES =====
-function detectarEstado(texto){
-  for (let e of estados) {
-    if (texto.includes(e)) return e.toUpperCase();
+function analizarTexto(texto) {
+  texto = texto.toLowerCase();
+
+  let resultado = {
+    estado: null,
+    edad: null,
+    materia: null,
+    delito: null,
+    violencia: false,
+    arma: false
+  };
+
+  estados.forEach(e => {
+    if (texto.includes(e)) resultado.estado = e.toUpperCase();
+  });
+
+  const edadMatch = texto.match(/(\d{2})\s*años/);
+  if (edadMatch) resultado.edad = edadMatch[1];
+
+  if (texto.includes("robe") || texto.includes("robo") || texto.includes("asalto")) {
+    resultado.materia = "PENAL";
+    resultado.delito = "ROBO";
   }
-  return "NO INDICADO";
-}
 
-function detectarEdad(texto){
-  const m = texto.match(/\b([1-9][0-9])\s*años\b/);
-  return m ? m[1] : "NO INDICADA";
-}
-
-// ===== CLASIFICACIÓN =====
-function clasificar(texto){
-  // CIVIL / MERCANTIL
   if (texto.includes("debo") || texto.includes("deuda") || texto.includes("banco")) {
-    return { materia:"CIVIL / MERCANTIL", asunto:"Deuda / Incumplimiento de pago" };
+    resultado.materia = "CIVIL / MERCANTIL";
+    resultado.delito = "DEUDA";
   }
 
-  // FAMILIAR
-  if (texto.includes("divorcio") || texto.includes("pensión") || texto.includes("custodia")) {
-    return { materia:"FAMILIAR", asunto:"Conflicto familiar" };
+  if (texto.includes("violencia") || texto.includes("amenaza")) {
+    resultado.violencia = true;
   }
 
-  // TRÁNSITO
-  if (texto.includes("choque") || texto.includes("accidente") || texto.includes("alcohol")) {
-    return { materia:"TRÁNSITO", asunto:"Delito o falta vial" };
+  if (texto.includes("arma") || texto.includes("pistola") || texto.includes("cuchillo")) {
+    resultado.arma = true;
   }
 
-  // PENAL – ROBO
-  if (texto.includes("robe") || texto.includes("robo")) {
-    if (texto.includes("arma")) {
-      return { materia:"PENAL", asunto:"Robo con violencia" };
+  return resultado;
+}
+
+function generarRespuesta(r) {
+  let html = `⚖️ ANÁLISIS JURÍDICO INTEGRAL (EDUCATIVO)\n\n`;
+
+  html += `📌 Hechos narrados:\n${input.value}\n\n`;
+
+  html += `📂 Clasificación jurídica:\n`;
+  html += `• Materia: ${r.materia ?? "NO DETERMINADA"}\n`;
+  html += `• Delito / Asunto: ${r.delito ?? "NO DETERMINADO"}\n`;
+  html += `• Estado: ${r.estado ?? "NO IDENTIFICADO"}\n`;
+  html += `• Edad: ${r.edad ?? "NO INDICADA"}\n\n`;
+
+  html += `👨‍⚖️ Posibles consecuencias (orientativas):\n`;
+
+  if (r.delito === "ROBO") {
+    if (r.arma || r.violencia) {
+      html += `• Robo con violencia: penas altas según el código penal estatal.\n`;
+    } else {
+      html += `• Robo simple: penas menores o medidas alternas.\n`;
     }
-    return { materia:"PENAL", asunto:"Robo simple" };
+  } else if (r.delito === "DEUDA") {
+    html += `• Las deudas NO generan cárcel.\n`;
+    html += `• Procede demanda civil o mercantil.\n`;
+  } else {
+    html += `• No es posible estimar consecuencias sin más datos.\n`;
   }
 
-  // PENAL – LESIONES
-  if (texto.includes("pele") || texto.includes("golpe") || texto.includes("lesion")) {
-    return { materia:"PENAL", asunto:"Lesiones" };
+  html += `\n📍 Información que FALTA para un análisis más preciso:\n`;
+
+  if (!r.estado) html += `• Estado de la República\n`;
+  if (!r.edad) html += `• Edad exacta\n`;
+
+  if (r.delito === "ROBO") {
+    if (!r.violencia) html += `• ¿Hubo violencia o amenazas?\n`;
+    if (!r.arma) html += `• ¿Se utilizó algún arma?\n`;
+    html += `• ¿El vehículo fue recuperado?\n`;
+    html += `• ¿Existe denuncia formal?\n`;
   }
 
-  return { materia:"NO DETERMINADA", asunto:"Por determinar" };
+  if (r.delito === "DEUDA") {
+    html += `• Monto de la deuda\n`;
+    html += `• Tipo de crédito\n`;
+    html += `• Tiempo de atraso\n`;
+    html += `• Si existe demanda judicial\n`;
+  }
+
+  html += `\n⚠️ AVISO LEGAL:\nUso educativo. No sustituye asesoría legal profesional.`;
+
+  return html;
 }
 
-// ===== CONSECUENCIAS =====
-function consecuencias(materia, asunto){
-  if (materia === "CIVIL / MERCANTIL") {
-    return `
-• Demandas mercantiles
-• Embargo de bienes o cuentas
-• Intereses moratorios
-• Reporte en buró de crédito
-🚫 NO hay cárcel por deudas
-`;
-  }
+btn.addEventListener("click", () => {
+  const texto = input.value.trim();
+  if (!texto) return;
 
-  if (materia === "FAMILIAR") {
-    return `
-• Resoluciones judiciales
-• Pensiones
-• Custodia o régimen de visitas
-• Multas por incumplimiento
-`;
-  }
-
-  if (materia === "TRÁNSITO") {
-    return `
-• Multas
-• Suspensión de licencia
-• Responsabilidad civil
-• Prisión SOLO si hubo lesiones graves o muerte
-`;
-  }
-
-  if (materia === "PENAL") {
-    if (asunto.includes("violencia")) {
-      return `
-• Prisión (años variables según estado)
-• Multas elevadas
-• Antecedentes penales
-• Reparación del daño
-`;
-    }
-    return `
-• Prisión o sanciones alternativas
-• Multas
-• Reparación del daño
-`;
-  }
-
-  return "No es posible estimar consecuencias sin clasificar el asunto.";
-}
-
-// ===== INFO FALTANTE INTELIGENTE =====
-function infoFaltante(materia, asunto){
-  if (materia === "CIVIL / MERCANTIL") {
-    return `
-• Monto de la deuda
-• Tiempo de atraso
-• Tipo de crédito
-• Si existe demanda
-`;
-  }
-
-  if (materia === "PENAL") {
-    return `
-• Gravedad del daño
-• Uso de armas
-• Existencia de denuncia
-• Antecedentes
-`;
-  }
-
-  if (materia === "FAMILIAR") {
-    return `
-• Estado civil
-• Existencia de hijos
-• Resoluciones previas
-`;
-  }
-
-  return "Se requiere mayor detalle del caso.";
-}
-
-// ===== ENDPOINT =====
-app.post("/chat", (req, res) => {
-  const texto = (req.body.pregunta || "").toLowerCase();
-
-  const estado = detectarEstado(texto);
-  const edad = detectarEdad(texto);
-  const { materia, asunto } = clasificar(texto);
-
-  const respuesta = `
-⚖️ ANÁLISIS JURÍDICO INTEGRAL (FINES EDUCATIVOS)
-
-📌 Hechos narrados:
-${req.body.pregunta}
-
-📂 Clasificación jurídica:
-• Materia: ${materia}
-• Asunto: ${asunto}
-• Estado: ${estado}
-• Edad: ${edad}
-
-⏳ Posibles consecuencias ORIENTATIVAS:
-${consecuencias(materia, asunto)}
-
-📍 Información que FALTA para una estimación más precisa:
-${infoFaltante(materia, asunto)}
-
-⚠️ AVISO LEGAL:
-Uso educativo. No sustituye asesoría legal profesional.
-`;
-
-  res.json({ respuesta });
-});
-
-// ===== PUERTO =====
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Chatbot legal activo");
+  const analisis = analizarTexto(texto);
+  output.textContent = generarRespuesta(analisis);
 });
