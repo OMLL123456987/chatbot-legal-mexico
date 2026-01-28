@@ -1,3 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Chatbot Legal México</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+    textarea { width: 100%; height: 80px; }
+    button { padding: 10px 20px; margin-top: 10px; }
+    pre { white-space: pre-wrap; background: #fff; padding: 15px; }
+  </style>
+</head>
+<body>
+
+<h2>⚖️ Chatbot Legal (México)</h2>
+<p><strong>Uso educativo. No sustituye asesoría legal.</strong></p>
+
+<textarea id="input" placeholder="Describe el caso con estado y edad..."></textarea>
+<br>
+<button onclick="enviar()">Enviar</button>
+
+<pre id="respuesta"></pre>
+
+<script>
 function enviar() {
   const input = document.getElementById("input").value.toLowerCase();
   const out = document.getElementById("respuesta");
@@ -8,69 +32,77 @@ function enviar() {
   }
 
   /* =========================
-     DETECCIÓN DE ESTADO
+     ESTADOS
   ========================= */
-  const estados = [
-    "cdmx","ciudad de mexico","jalisco","nuevo leon","edomex","estado de mexico",
-    "puebla","queretaro","guanajuato","veracruz","sonora","sinaloa","chihuahua",
-    "coahuila","tamaulipas","yucatan","quintana roo","baja california"
-  ];
+  const estados = {
+    "cdmx": "Ciudad de México",
+    "ciudad de mexico": "Ciudad de México",
+    "jalisco": "Jalisco",
+    "nuevo leon": "Nuevo León",
+    "edomex": "Estado de México",
+    "estado de mexico": "Estado de México",
+    "puebla": "Puebla",
+    "queretaro": "Querétaro",
+    "guanajuato": "Guanajuato",
+    "veracruz": "Veracruz",
+    "sonora": "Sonora",
+    "sinaloa": "Sinaloa",
+    "chihuahua": "Chihuahua",
+    "coahuila": "Coahuila",
+    "tamaulipas": "Tamaulipas",
+    "yucatan": "Yucatán",
+    "quintana roo": "Quintana Roo",
+    "baja california": "Baja California"
+  };
 
   let estado = "No detectado";
-  estados.forEach(e => {
-    if (input.includes(e)) estado = e.toUpperCase();
-  });
+  for (let e in estados) {
+    if (input.includes(e)) estado = estados[e];
+  }
 
   /* =========================
-     DETECCIÓN DE EDAD
+     EDAD
   ========================= */
   let edad = "No indicada";
   const edadMatch = input.match(/\b\d{2}\b/);
-  if (edadMatch) edad = edadMatch[0];
+  if (edadMatch) edad = edadMatch[0] + " años";
 
   /* =========================
-     CLASIFICACIÓN DE MATERIA
+     MATERIA
   ========================= */
   let materia = "No determinada";
 
   if (
-    input.includes("robe") ||
-    input.includes("robo") ||
-    input.includes("lesion") ||
-    input.includes("golpee") ||
-    input.includes("arma") ||
-    input.includes("amenaza")
+    input.includes("robo") || input.includes("robe") ||
+    input.includes("arma") || input.includes("lesion") ||
+    input.includes("matar") || input.includes("amenaza")
   ) materia = "PENAL";
 
   if (
-    input.includes("debo") ||
-    input.includes("deuda") ||
-    input.includes("banco") ||
-    input.includes("contrato")
+    input.includes("debo") || input.includes("deuda") ||
+    input.includes("banco") || input.includes("contrato")
   ) materia = "CIVIL / MERCANTIL";
 
   if (
-    input.includes("divorcio") ||
-    input.includes("custodia") ||
-    input.includes("pension") ||
-    input.includes("hijos")
+    input.includes("divorcio") || input.includes("custodia") ||
+    input.includes("pension") || input.includes("hijos")
   ) materia = "FAMILIAR";
 
   if (
-    input.includes("choque") ||
-    input.includes("accidente") ||
+    input.includes("choque") || input.includes("accidente") ||
     input.includes("alcohol")
-  ) materia = "TRANSITO";
+  ) materia = "TRÁNSITO";
 
   /* =========================
-     DETECCIÓN DE DELITO
+     DELITO / ASUNTO
   ========================= */
   let delito = "No determinado";
 
   if (input.includes("robo") && input.includes("arma")) delito = "Robo con violencia";
-  else if (input.includes("robo")) delito = "Robo simple";
-  else if (input.includes("lesion")) delito = "Lesiones";
-  else if (input.includes("matar")) delito = "Homicidio";
+  else if (input.includes("robo") || input.includes("robe")) delito = "Robo simple";
+  else if (input.includes("vehiculo") || input.includes("carro")) delito = "Robo de vehículo";
+  else if (input.includes("lesion") || input.includes("golpe")) delito = "Lesiones";
+  else if (input.includes("matar") || input.includes("murio")) delito = "Homicidio";
   else if (input.includes("fraude")) delito = "Fraude";
   else if (input.includes("extorsion")) delito = "Extorsión";
   else if (input.includes("divorcio")) delito = "Divorcio contencioso";
@@ -93,42 +125,43 @@ function enviar() {
   if (delito === "Robo simple") {
     pena = "Prisión aproximada de 6 meses a 4 años y multa (varía por estado).";
   }
-
   if (delito === "Robo con violencia") {
-    pena = "Prisión aproximada de 5 a 15 años, agravantes aumentan pena.";
+    pena = "Prisión aproximada de 5 a 15 años; agravantes aumentan la pena.";
   }
-
+  if (delito === "Robo de vehículo") {
+    pena = "Prisión aproximada de 5 a 10 años.";
+  }
   if (delito === "Lesiones") {
-    pena = "De multas hasta prisión, depende si son leves, graves o permanentes.";
+    pena = "Desde multas hasta prisión, según gravedad.";
   }
-
+  if (delito === "Homicidio") {
+    pena = "Prisión aproximada de 12 a 30 años.";
+  }
   if (delito === "Fraude") {
-    pena = "Prisión y multa dependiendo del monto defraudado.";
+    pena = "Prisión y multa dependiendo del monto.";
   }
-
   if (delito === "Divorcio contencioso") {
-    pena = "No hay prisión. Puede haber obligaciones económicas y custodia.";
+    pena = "No hay prisión. Puede haber pensión, custodia y bienes.";
   }
 
   /* =========================
-     QUÉ HACER SI TE PASÓ A TI
+     QUÉ HACER
   ========================= */
   let queHacer = `
 • Reunir pruebas
 • Evitar confrontaciones
 • Consultar abogado
-• Valorar denuncia o defensa
+• Valorar denuncia o defensa legal
 `;
 
   /* =========================
-     INFORMACIÓN FALTANTE
+     INFO FALTANTE
   ========================= */
   let faltante = [];
-
   if (!input.includes("denuncia")) faltante.push("¿Existe denuncia formal?");
-  if (!input.includes("arma") && materia === "PENAL") faltante.push("¿Se utilizó algún arma?");
-  if (!input.includes("lesion")) faltante.push("¿Hubo lesiones? ¿Qué gravedad?");
-  if (!input.includes("recuperado") && delito.includes("Robo")) faltante.push("¿Se recuperó el bien?");
+  if (materia === "PENAL" && !input.includes("arma")) faltante.push("¿Se utilizó arma?");
+  if (!input.includes("lesion")) faltante.push("¿Hubo lesiones y qué gravedad?");
+  if (delito.includes("Robo") && !input.includes("recuper")) faltante.push("¿Se recuperó el bien?");
   if (estado === "No detectado") faltante.push("Estado de la República");
 
   /* =========================
@@ -145,7 +178,7 @@ ${input}
 • Estado: ${estado}
 • Edad: ${edad}
 
-⚠️ Agravantes detectados:
+⚠️ Agravantes:
 ${agravantes.length ? agravantes.join(", ") : "Ninguno detectado"}
 
 ⏳ Posibles consecuencias (ORIENTATIVAS):
@@ -154,19 +187,16 @@ ${pena}
 📌 ¿Qué hacer?
 ${queHacer}
 
-📍 Información que FALTA para una estimación más precisa:
-`;
+📍 Información que FALTA:
+${faltante.length ? faltante.map(f => "• " + f).join("\n") : "• Información suficiente para análisis general."}
 
-  if (faltante.length === 0) {
-    respuesta += "• Información suficiente para análisis general.";
-  } else {
-    faltante.forEach(f => respuesta += "• " + f + "\n");
-  }
-
-  respuesta += `
 ⚠️ AVISO LEGAL:
 Uso educativo. No sustituye asesoría legal profesional.
 `;
 
   out.innerText = respuesta;
 }
+</script>
+
+</body>
+</html>
