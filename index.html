@@ -1,20 +1,47 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Chatbot Legal México</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    #chat {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 700px;
+      margin: auto;
+    }
+    textarea {
+      width: 100%;
+      height: 80px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px;
+      width: 100%;
+      font-size: 16px;
+    }
+    .respuesta {
+      margin-top: 20px;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 <body>
 
-<div class="chat-container">
-  <h1>⚖️ Chatbot Legal (México)</h1>
-  <p class="aviso">Uso educativo. No sustituye asesoría legal.</p>
+<div id="chat">
+  <h2>⚖️ Chatbot Legal (México)</h2>
+  <p><b>Uso educativo. No sustituye asesoría legal.</b></p>
 
-  <textarea id="input" placeholder="Describe tu situación legal..."></textarea>
-  <button onclick="analizar()">Enviar</button>
+  <textarea id="input" placeholder="Describe el caso aquí..."></textarea>
+  <button onclick="enviar()">Enviar</button>
 
-  <div id="respuesta"></div>
+  <div class="respuesta" id="respuesta"></div>
 </div>
 
 <script src="index.js"></script>
