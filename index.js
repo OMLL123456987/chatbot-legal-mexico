@@ -1,110 +1,60 @@
-const input = document.getElementById("input");
-const output = document.getElementById("output");
-const btn = document.getElementById("send");
+function enviar() {
+  const texto = document.getElementById("input").value.toLowerCase();
+  const respuestaDiv = document.getElementById("respuesta");
 
-const estados = [
-  "aguascalientes","baja california","baja california sur","campeche",
-  "chiapas","chihuahua","cdmx","ciudad de mexico","coahuila","colima",
-  "durango","guanajuato","guerrero","hidalgo","jalisco","mexico",
-  "michoacan","morelos","nayarit","nuevo leon","oaxaca","puebla",
-  "queretaro","quintana roo","san luis potosi","sinaloa","sonora",
-  "tabasco","tamaulipas","tlaxcala","veracruz","yucatan","zacatecas"
-];
-
-function analizarTexto(texto) {
-  texto = texto.toLowerCase();
-
-  let resultado = {
-    estado: null,
-    edad: null,
-    materia: null,
-    delito: null,
-    violencia: false,
-    arma: false
-  };
-
-  estados.forEach(e => {
-    if (texto.includes(e)) resultado.estado = e.toUpperCase();
-  });
-
-  const edadMatch = texto.match(/(\d{2})\s*años/);
-  if (edadMatch) resultado.edad = edadMatch[1];
-
-  if (texto.includes("robe") || texto.includes("robo") || texto.includes("asalto")) {
-    resultado.materia = "PENAL";
-    resultado.delito = "ROBO";
+  if (!texto.trim()) {
+    respuestaDiv.innerText = "⚠️ Escribe un caso para analizar.";
+    return;
   }
 
-  if (texto.includes("debo") || texto.includes("deuda") || texto.includes("banco")) {
-    resultado.materia = "CIVIL / MERCANTIL";
-    resultado.delito = "DEUDA";
-  }
+  let estado = "No detectado";
+  if (texto.includes("cdmx")) estado = "Ciudad de México";
+  if (texto.includes("jalisco")) estado = "Jalisco";
+  if (texto.includes("nuevo león")) estado = "Nuevo León";
 
-  if (texto.includes("violencia") || texto.includes("amenaza")) {
-    resultado.violencia = true;
-  }
+  let edadMatch = texto.match(/\d{2}/);
+  let edad = edadMatch ? edadMatch[0] : "No indicada";
 
-  if (texto.includes("arma") || texto.includes("pistola") || texto.includes("cuchillo")) {
-    resultado.arma = true;
-  }
+  let delito = "No determinado";
+  if (texto.includes("robo")) delito = "Robo";
+  if (texto.includes("arma")) delito = "Robo con violencia";
+  if (texto.includes("choque")) delito = "Delito de tránsito";
+  if (texto.includes("divorcio")) delito = "Divorcio";
 
-  return resultado;
-}
+  let faltante = [];
+  if (!texto.includes("violencia")) faltante.push("¿Hubo violencia?");
+  if (!texto.includes("arma")) faltante.push("¿Se usó algún arma?");
+  if (!texto.includes("denuncia")) faltante.push("¿Existe denuncia formal?");
+  if (!texto.includes("daño")) faltante.push("¿Qué daño se causó?");
 
-function generarRespuesta(r) {
-  let html = `⚖️ ANÁLISIS JURÍDICO INTEGRAL (EDUCATIVO)\n\n`;
+  let respuesta = `⚖️ ANÁLISIS JURÍDICO INTEGRAL (FINES EDUCATIVOS)
 
-  html += `📌 Hechos narrados:\n${input.value}\n\n`;
+📌 Hechos narrados:
+${texto}
 
-  html += `📂 Clasificación jurídica:\n`;
-  html += `• Materia: ${r.materia ?? "NO DETERMINADA"}\n`;
-  html += `• Delito / Asunto: ${r.delito ?? "NO DETERMINADO"}\n`;
-  html += `• Estado: ${r.estado ?? "NO IDENTIFICADO"}\n`;
-  html += `• Edad: ${r.edad ?? "NO INDICADA"}\n\n`;
+📂 Clasificación jurídica:
+• Delito / Asunto: ${delito}
+• Estado: ${estado}
+• Edad: ${edad}
 
-  html += `👨‍⚖️ Posibles consecuencias (orientativas):\n`;
+👨‍⚖️ Posibles consecuencias (ORIENTATIVAS):
+Dependen del Código Penal del estado, gravedad y agravantes.
 
-  if (r.delito === "ROBO") {
-    if (r.arma || r.violencia) {
-      html += `• Robo con violencia: penas altas según el código penal estatal.\n`;
-    } else {
-      html += `• Robo simple: penas menores o medidas alternas.\n`;
-    }
-  } else if (r.delito === "DEUDA") {
-    html += `• Las deudas NO generan cárcel.\n`;
-    html += `• Procede demanda civil o mercantil.\n`;
+📍 Información que FALTA para una mejor estimación:
+`;
+
+  if (faltante.length === 0) {
+    respuesta += "• Información suficiente para un análisis general.";
   } else {
-    html += `• No es posible estimar consecuencias sin más datos.\n`;
+    faltante.forEach(p => {
+      respuesta += "• " + p + "\n";
+    });
   }
 
-  html += `\n📍 Información que FALTA para un análisis más preciso:\n`;
+  respuesta += `
 
-  if (!r.estado) html += `• Estado de la República\n`;
-  if (!r.edad) html += `• Edad exacta\n`;
+⚠️ AVISO LEGAL:
+Uso educativo. No sustituye asesoría legal profesional.`;
 
-  if (r.delito === "ROBO") {
-    if (!r.violencia) html += `• ¿Hubo violencia o amenazas?\n`;
-    if (!r.arma) html += `• ¿Se utilizó algún arma?\n`;
-    html += `• ¿El vehículo fue recuperado?\n`;
-    html += `• ¿Existe denuncia formal?\n`;
-  }
-
-  if (r.delito === "DEUDA") {
-    html += `• Monto de la deuda\n`;
-    html += `• Tipo de crédito\n`;
-    html += `• Tiempo de atraso\n`;
-    html += `• Si existe demanda judicial\n`;
-  }
-
-  html += `\n⚠️ AVISO LEGAL:\nUso educativo. No sustituye asesoría legal profesional.`;
-
-  return html;
+  respuestaDiv.innerText = respuesta;
 }
-
-btn.addEventListener("click", () => {
-  const texto = input.value.trim();
-  if (!texto) return;
-
-  const analisis = analizarTexto(texto);
-  output.textContent = generarRespuesta(analisis);
-});
