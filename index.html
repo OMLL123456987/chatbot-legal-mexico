@@ -9,45 +9,51 @@
 
 body{
 font-family: Arial;
-background:#111;
-color:white;
+background:#f4f4f4;
 text-align:center;
 padding:40px;
 }
 
-h1{
-color:#00ffaa;
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+max-width:800px;
+margin:auto;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 textarea{
-width:70%;
-height:100px;
-font-size:16px;
+width:100%;
+height:120px;
 padding:10px;
-border-radius:8px;
-border:none;
+font-size:16px;
+margin-top:10px;
 }
 
 button{
 margin-top:15px;
-padding:12px 30px;
-font-size:18px;
-background:#00ffaa;
+padding:12px 25px;
+font-size:16px;
+background:#2c3e50;
+color:white;
 border:none;
-border-radius:10px;
+border-radius:6px;
 cursor:pointer;
 }
 
-#respuesta{
+button:hover{
+background:#34495e;
+}
+
+.respuesta{
 margin-top:30px;
-white-space:pre-wrap;
 text-align:left;
-width:70%;
-margin-left:auto;
-margin-right:auto;
-background:#222;
+white-space:pre-line;
+background:#fafafa;
 padding:20px;
-border-radius:10px;
+border-radius:6px;
+border:1px solid #ddd;
 }
 
 </style>
@@ -56,28 +62,38 @@ border-radius:10px;
 
 <body>
 
+<div class="container">
+
 <h1>⚖️ Chatbot Legal (México)</h1>
 
 <p>Uso educativo. No sustituye asesoría legal.</p>
 
-<textarea id="input" placeholder="Describe tu caso legal..."></textarea>
+<textarea id="pregunta" placeholder="Ejemplo: Robé un carro con arma en CDMX, tengo 30 años"></textarea>
 
 <br>
 
-<button onclick="analizar()">Analizar</button>
+<button onclick="analizar()">Analizar caso</button>
 
-<div id="respuesta"></div>
+<div class="respuesta" id="respuesta"></div>
+
+</div>
 
 <script>
 
 async function analizar(){
 
-const pregunta = document.getElementById("input").value;
+const pregunta = document.getElementById("pregunta").value;
 
-if(!pregunta){
-alert("Escribe una pregunta");
+const respuestaBox = document.getElementById("respuesta");
+
+if(!pregunta.trim()){
+respuestaBox.innerText="⚠️ Escribe un caso para analizar.";
 return;
 }
+
+respuestaBox.innerText="Analizando caso...";
+
+try{
 
 const res = await fetch("/api/chat",{
 method:"POST",
@@ -89,7 +105,13 @@ body:JSON.stringify({pregunta})
 
 const data = await res.json();
 
-document.getElementById("respuesta").innerText = data.respuesta;
+respuestaBox.innerText=data.respuesta;
+
+}catch(error){
+
+respuestaBox.innerText="❌ Error de conexión con el servidor.";
+
+}
 
 }
 
