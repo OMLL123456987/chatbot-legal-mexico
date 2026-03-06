@@ -1,80 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
 <meta charset="UTF-8">
-<title>Chatbot Legal México</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<style>
-body{
-font-family: Arial, sans-serif;
-background:#f5f5f5;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
-}
+<title>Chatbot Legal Mexico</title>
 
-.container{
-background:white;
-padding:30px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.1);
-width:400px;
-}
+<link rel="stylesheet" href="style.css">
 
-h1{
-font-size:22px;
-margin-bottom:15px;
-}
-
-textarea{
-width:100%;
-height:100px;
-padding:10px;
-margin-bottom:10px;
-border-radius:5px;
-border:1px solid #ccc;
-}
-
-button{
-width:100%;
-padding:10px;
-background:#0070f3;
-color:white;
-border:none;
-border-radius:5px;
-cursor:pointer;
-font-size:16px;
-}
-
-button:hover{
-background:#0055c3;
-}
-
-.respuesta{
-margin-top:15px;
-background:#f0f0f0;
-padding:10px;
-border-radius:5px;
-white-space:pre-wrap;
-}
-</style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="card">
 
-<h1>⚖️ Chatbot Legal México</h1>
+<h1>⚖️ Chatbot Legal Mexico</h1>
 
 <p>Describe una situación legal:</p>
 
-<textarea id="input" placeholder="Ejemplo: Robo un carro con arma en CDMX, tengo 30 años..."></textarea>
+<textarea placeholder="Ejemplo: Robé un carro con arma en CDMX, tengo 30 años, hay denuncia"></textarea>
 
-<button onclick="analizar()">Analizar caso</button>
+<button>Analizar caso</button>
 
-<div id="respuesta" class="respuesta"></div>
+<div id="resultado"></div>
 
 </div>
 
