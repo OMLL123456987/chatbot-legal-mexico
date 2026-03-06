@@ -1,120 +1,199 @@
- if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
+export default function handler(req,res){
 
-  const { pregunta } = req.body;
+if(req.method !== "POST"){
+return res.status(405).json({error:"Metodo no permitido"})
+}
 
-  if (!pregunta) {
-    return res.status(400).json({ respuesta: "⚠️ No se recibió ninguna pregunta." });
-  }
+const pregunta = req.body.pregunta || ""
+const texto = pregunta.toLowerCase()
 
-  const texto = pregunta.toLowerCase();
+let materia="No determinada"
+let delito="No identificado"
+let pena="No es posible estimar."
 
-  let materia = "No determinada";
-  let delito = "No identificado";
-  let pena = "No se puede estimar con la información actual.";
+/* =====================
+ROBO
+===================== */
 
-  /* =========================
-     CLASIFICACIÓN BÁSICA
-  ========================= */
+if(texto.includes("robo") || texto.includes("robe")){
 
-  if (
-    texto.includes("robo") ||
-    texto.includes("robe") ||
-    texto.includes("arma") ||
-    texto.includes("golpee") ||
-    texto.includes("lesion") ||
-    texto.includes("matar")
-  ) {
-    materia = "Penal";
-  }
+materia="Penal"
+delito="Robo simple"
+pena="6 meses a 4 años de prisión dependiendo del estado."
 
-  if (
-    texto.includes("deuda") ||
-    texto.includes("banco") ||
-    texto.includes("contrato")
-  ) {
-    materia = "Civil / Mercantil";
-  }
+}
 
-  if (
-    texto.includes("divorcio") ||
-    texto.includes("custodia") ||
-    texto.includes("pension") ||
-    texto.includes("hijos")
-  ) {
-    materia = "Familiar";
-  }
+if(texto.includes("arma")){
 
-  if (
-    texto.includes("choque") ||
-    texto.includes("accidente") ||
-    texto.includes("alcohol")
-  ) {
-    materia = "Tránsito";
-  }
+delito="Robo con violencia"
+pena="5 a 15 años de prisión dependiendo del estado."
 
-  /* =========================
-     DELITOS
-  ========================= */
+}
 
-  if (texto.includes("robo") && texto.includes("arma")) {
-    delito = "Robo con violencia";
-    pena = "Aproximadamente 5 a 15 años de prisión dependiendo del estado.";
-  }
+/* =====================
+LESIONES
+===================== */
 
-  else if (texto.includes("robo")) {
-    delito = "Robo simple";
-    pena = "Entre 6 meses y 4 años de prisión dependiendo del estado.";
-  }
+if(texto.includes("golpee") || texto.includes("lesion")){
 
-  else if (texto.includes("lesion") || texto.includes("golpee")) {
-    delito = "Lesiones";
-    pena = "Puede ir desde multa hasta varios años de prisión según la gravedad.";
-  }
+materia="Penal"
+delito="Lesiones"
 
-  else if (texto.includes("matar") || texto.includes("homicidio")) {
-    delito = "Homicidio";
-    pena = "De 8 a 20 años de prisión o más dependiendo del estado.";
-  }
+pena="Multa o prisión dependiendo de la gravedad de las lesiones."
 
-  else if (texto.includes("fraude")) {
-    delito = "Fraude";
-    pena = "Multa y prisión dependiendo del monto.";
-  }
+}
 
-  else if (texto.includes("divorcio")) {
-    delito = "Divorcio contencioso";
-    pena = "No hay prisión. Es un procedimiento civil.";
-  }
+/* =====================
+HOMICIDIO
+===================== */
 
-  /* =========================
-     RESPUESTA
-  ========================= */
+if(texto.includes("mate") || texto.includes("matar")){
 
-  const respuesta = `
-⚖️ ANÁLISIS JURÍDICO (EDUCATIVO)
+materia="Penal"
+delito="Homicidio"
 
-📌 Hechos narrados:
+pena="10 a 40 años de prisión dependiendo del estado."
+
+}
+
+/* =====================
+FRAUDE
+===================== */
+
+if(texto.includes("fraude") || texto.includes("estafa")){
+
+materia="Penal"
+delito="Fraude"
+
+pena="3 a 12 años de prisión dependiendo del monto."
+
+}
+
+/* =====================
+EXTORSION
+===================== */
+
+if(texto.includes("extorsion")){
+
+materia="Penal"
+delito="Extorsión"
+
+pena="8 a 20 años de prisión."
+
+}
+
+/* =====================
+DEUDAS
+===================== */
+
+if(texto.includes("debo") || texto.includes("banco") || texto.includes("deuda")){
+
+materia="Civil / Mercantil"
+delito="Deuda"
+
+pena="No hay cárcel por deudas en México."
+
+}
+
+/* =====================
+DIVORCIO
+===================== */
+
+if(texto.includes("divorcio")){
+
+materia="Familiar"
+delito="Divorcio"
+
+pena="Proceso legal sin prisión."
+
+}
+
+/* =====================
+CUSTODIA
+===================== */
+
+if(texto.includes("custodia") || texto.includes("hijos")){
+
+materia="Familiar"
+delito="Custodia"
+
+pena="Resolución judicial sobre patria potestad."
+
+}
+
+/* =====================
+ACCIDENTE
+===================== */
+
+if(texto.includes("choque") || texto.includes("accidente")){
+
+materia="Transito"
+delito="Accidente de tránsito"
+
+pena="Multas, reparación del daño o prisión si hay lesiones."
+
+}
+
+/* =====================
+DROGAS
+===================== */
+
+if(texto.includes("droga") || texto.includes("cocaina") || texto.includes("marihuana")){
+
+materia="Penal"
+delito="Posesión de drogas"
+
+pena="Multa o prisión dependiendo de la cantidad."
+
+}
+
+/* =====================
+ARMAS
+===================== */
+
+if(texto.includes("arma") || texto.includes("pistola")){
+
+materia="Penal"
+delito="Portación ilegal de arma"
+
+pena="3 a 10 años de prisión."
+
+}
+
+/* =====================
+RESPUESTA
+===================== */
+
+const respuesta = `
+
+⚖️ ANÁLISIS JURÍDICO (FINES EDUCATIVOS)
+
+📌 Hechos narrados
 ${pregunta}
 
-📂 Clasificación:
-• Materia: ${materia}
-• Posible delito/asunto: ${delito}
+📂 Clasificación jurídica
+Materia: ${materia}
 
-⏳ Posibles consecuencias orientativas:
+Delito / asunto
+${delito}
+
+⏳ Posibles consecuencias
 ${pena}
 
-📍 Para un análisis más preciso sería útil saber:
+📍 Información que faltaría para un análisis más preciso
+
 • Estado de la República
-• Edad de las personas
 • Si hubo violencia
-• Si existe denuncia
+• Si hubo denuncia
+• Si hubo lesiones
+• Si hubo armas
 
-⚠️ AVISO LEGAL:
-Uso educativo. No sustituye asesoría legal profesional.
-`;
+⚠️ AVISO LEGAL
+Uso educativo.
+No sustituye asesoría legal profesional.
 
-  res.status(200).json({ respuesta });
+`
+
+res.status(200).json({respuesta})
 
 }
