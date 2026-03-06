@@ -3,31 +3,97 @@
 
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚖️ Chatbot Legal México</title>
 
-<title>Chatbot Legal Mexico</title>
+<style>
 
-<link rel="stylesheet" href="style.css">
+body{
+font-family: Arial;
+background:#111;
+color:white;
+text-align:center;
+padding:40px;
+}
+
+h1{
+color:#00ffaa;
+}
+
+textarea{
+width:70%;
+height:100px;
+font-size:16px;
+padding:10px;
+border-radius:8px;
+border:none;
+}
+
+button{
+margin-top:15px;
+padding:12px 30px;
+font-size:18px;
+background:#00ffaa;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+#respuesta{
+margin-top:30px;
+white-space:pre-wrap;
+text-align:left;
+width:70%;
+margin-left:auto;
+margin-right:auto;
+background:#222;
+padding:20px;
+border-radius:10px;
+}
+
+</style>
 
 </head>
 
 <body>
 
-<div class="card">
+<h1>⚖️ Chatbot Legal (México)</h1>
 
-<h1>⚖️ Chatbot Legal Mexico</h1>
+<p>Uso educativo. No sustituye asesoría legal.</p>
 
-<p>Describe una situación legal:</p>
+<textarea id="input" placeholder="Describe tu caso legal..."></textarea>
 
-<textarea placeholder="Ejemplo: Robé un carro con arma en CDMX, tengo 30 años, hay denuncia"></textarea>
+<br>
 
-<button>Analizar caso</button>
+<button onclick="analizar()">Analizar</button>
 
-<div id="resultado"></div>
+<div id="respuesta"></div>
 
-</div>
+<script>
 
-<script src="index.js"></script>
+async function analizar(){
+
+const pregunta = document.getElementById("input").value;
+
+if(!pregunta){
+alert("Escribe una pregunta");
+return;
+}
+
+const res = await fetch("/api/chat",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({pregunta})
+});
+
+const data = await res.json();
+
+document.getElementById("respuesta").innerText = data.respuesta;
+
+}
+
+</script>
 
 </body>
 </html>
