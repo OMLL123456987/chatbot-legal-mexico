@@ -1,340 +1,84 @@
-function enviar() {
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Chatbot Legal México</title>
 
-const input = document.getElementById("input").value.toLowerCase();
-const out = document.getElementById("respuesta");
-
-if(!input.trim()){
-out.innerText = "⚠️ Describe una situación legal para analizar.";
-return;
+<style>
+body{
+font-family: Arial, sans-serif;
+background:#f5f5f5;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+margin:0;
 }
 
-/* =========================
-ESTADOS DE MÉXICO
-========================= */
-
-const estados = [
-"cdmx","ciudad de mexico",
-"edomex","estado de mexico",
-"jalisco","nuevo leon","puebla",
-"queretaro","guanajuato",
-"veracruz","sonora","sinaloa",
-"chihuahua","coahuila",
-"tamaulipas","yucatan",
-"quintana roo","baja california",
-"baja california sur",
-"zacatecas","durango",
-"michoacan","guerrero",
-"oaxaca","chiapas",
-"tabasco","campeche",
-"aguascalientes",
-"san luis potosi",
-"nayarit","colima",
-"hidalgo","morelos",
-"tlaxcala"
-];
-
-let estado = "No detectado";
-
-estados.forEach(e=>{
-if(input.includes(e)){
-estado = e.toUpperCase();
-}
-});
-
-/* =========================
-DETECCIÓN DE EDAD
-========================= */
-
-let edad = "No indicada";
-
-const edadRegex = input.match(/\b\d{1,2}\b/);
-
-if(edadRegex){
-edad = edadRegex[0];
+.container{
+background:white;
+padding:30px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+width:400px;
 }
 
-/* =========================
-MATERIAS DEL DERECHO
-========================= */
-
-let materia = "No determinada";
-
-/* PENAL */
-
-if(
-input.includes("robo") ||
-input.includes("arma") ||
-input.includes("matar") ||
-input.includes("homicidio") ||
-input.includes("lesion") ||
-input.includes("golpee") ||
-input.includes("amenaza") ||
-input.includes("fraude") ||
-input.includes("extorsion") ||
-input.includes("secuestro")
-){
-materia = "PENAL";
+h1{
+font-size:22px;
+margin-bottom:15px;
 }
 
-/* CIVIL */
-
-if(
-input.includes("deuda") ||
-input.includes("debo") ||
-input.includes("banco") ||
-input.includes("contrato") ||
-input.includes("demanda civil") ||
-input.includes("pagaré")
-){
-materia = "CIVIL / MERCANTIL";
+textarea{
+width:100%;
+height:100px;
+padding:10px;
+margin-bottom:10px;
+border-radius:5px;
+border:1px solid #ccc;
 }
 
-/* FAMILIAR */
-
-if(
-input.includes("divorcio") ||
-input.includes("custodia") ||
-input.includes("pension") ||
-input.includes("hijos") ||
-input.includes("patria potestad")
-){
-materia = "FAMILIAR";
+button{
+width:100%;
+padding:10px;
+background:#0070f3;
+color:white;
+border:none;
+border-radius:5px;
+cursor:pointer;
+font-size:16px;
 }
 
-/* TRANSITO */
-
-if(
-input.includes("choque") ||
-input.includes("accidente") ||
-input.includes("atropelle") ||
-input.includes("atropellé") ||
-input.includes("maneje borracho") ||
-input.includes("alcohol") ||
-input.includes("conduciendo")
-){
-materia = "TRANSITO";
+button:hover{
+background:#0055c3;
 }
 
-/* FISCAL */
-
-if(
-input.includes("sat") ||
-input.includes("impuestos") ||
-input.includes("evasión") ||
-input.includes("defraudacion fiscal")
-){
-materia = "FISCAL";
+.respuesta{
+margin-top:15px;
+background:#f0f0f0;
+padding:10px;
+border-radius:5px;
+white-space:pre-wrap;
 }
+</style>
+</head>
 
-/* =========================
-DELITOS
-========================= */
+<body>
 
-let delito = "No determinado";
+<div class="container">
 
-if(input.includes("robo") && input.includes("arma")){
-delito = "Robo con violencia";
-}
+<h1>⚖️ Chatbot Legal México</h1>
 
-else if(input.includes("robo")){
-delito = "Robo simple";
-}
+<p>Describe una situación legal:</p>
 
-else if(input.includes("robo de carro") || input.includes("robo de auto")){
-delito = "Robo de vehículo";
-}
+<textarea id="input" placeholder="Ejemplo: Robo un carro con arma en CDMX, tengo 30 años..."></textarea>
 
-else if(input.includes("fraude")){
-delito = "Fraude";
-}
+<button onclick="analizar()">Analizar caso</button>
 
-else if(input.includes("extorsion")){
-delito = "Extorsión";
-}
+<div id="respuesta" class="respuesta"></div>
 
-else if(input.includes("lesion") || input.includes("golpee")){
-delito = "Lesiones";
-}
+</div>
 
-else if(input.includes("matar") || input.includes("homicidio")){
-delito = "Homicidio";
-}
+<script src="index.js"></script>
 
-else if(input.includes("secuestro")){
-delito = "Secuestro";
-}
-
-else if(input.includes("atropelle") || input.includes("atropellé")){
-delito = "Atropellamiento / Accidente de tránsito";
-}
-
-else if(input.includes("choque")){
-delito = "Accidente de tránsito";
-}
-
-else if(input.includes("divorcio")){
-delito = "Divorcio contencioso";
-}
-
-else if(input.includes("custodia")){
-delito = "Disputa de custodia";
-}
-
-else if(input.includes("deuda")){
-delito = "Incumplimiento de deuda";
-}
-
-else if(input.includes("impuestos")){
-delito = "Posible evasión fiscal";
-}
-
-/* =========================
-AGRAVANTES
-========================= */
-
-let agravantes = [];
-
-if(input.includes("arma")){
-agravantes.push("Uso de arma");
-}
-
-if(input.includes("violencia")){
-agravantes.push("Violencia");
-}
-
-if(input.includes("menor")){
-agravantes.push("Involucra menores");
-}
-
-if(input.includes("grave")){
-agravantes.push("Daño grave");
-}
-
-if(input.includes("borracho") || input.includes("alcohol")){
-agravantes.push("Conducción bajo alcohol");
-}
-
-/* =========================
-PENAS ORIENTATIVAS
-========================= */
-
-let pena = "No es posible estimar sin más información.";
-
-if(delito === "Robo simple"){
-pena = "6 meses a 4 años de prisión dependiendo del estado.";
-}
-
-if(delito === "Robo con violencia"){
-pena = "5 a 15 años de prisión dependiendo del código penal estatal.";
-}
-
-if(delito === "Robo de vehículo"){
-pena = "7 a 20 años dependiendo del estado.";
-}
-
-if(delito === "Fraude"){
-pena = "3 a 12 años dependiendo del monto.";
-}
-
-if(delito === "Extorsión"){
-pena = "8 a 20 años de prisión.";
-}
-
-if(delito === "Homicidio"){
-pena = "10 a 40 años dependiendo agravantes.";
-}
-
-if(delito === "Lesiones"){
-pena = "Multa o prisión dependiendo gravedad.";
-}
-
-if(delito === "Atropellamiento / Accidente de tránsito"){
-pena = "Puede implicar responsabilidad civil, multas o prisión si hubo lesiones.";
-}
-
-if(delito === "Divorcio contencioso"){
-pena = "No hay prisión. Puede implicar custodia y pensión.";
-}
-
-/* =========================
-QUE HACER
-========================= */
-
-let queHacer = `
-
-• Reunir pruebas
-• Consultar abogado
-• Analizar denuncia o defensa
-• Documentar hechos
-`;
-
-/* =========================
-INFO FALTANTE
-========================= */
-
-let faltante = [];
-
-if(!input.includes("denuncia")){
-faltante.push("¿Existe denuncia formal?");
-}
-
-if(materia === "PENAL" && !input.includes("arma")){
-faltante.push("¿Se utilizó algún arma?");
-}
-
-if(!input.includes("lesion")){
-faltante.push("¿Hubo lesiones?");
-}
-
-if(delito.includes("Robo") && !input.includes("recuperado")){
-faltante.push("¿Se recuperó el bien robado?");
-}
-
-if(estado === "No detectado"){
-faltante.push("¿En qué estado ocurrió?");
-}
-
-/* =========================
-RESPUESTA FINAL
-========================= */
-
-let respuesta = `⚖️ ANÁLISIS JURÍDICO INTEGRAL (FINES EDUCATIVOS)
-
-📌 Hechos narrados:
-${input}
-
-📂 Clasificación jurídica:
-• Materia: ${materia}
-• Delito / Asunto: ${delito}
-• Estado: ${estado}
-• Edad: ${edad}
-
-⚠️ Agravantes detectados:
-${agravantes.length ? agravantes.join(", ") : "Ninguno detectado"}
-
-⏳ Posibles consecuencias:
-${pena}
-
-📌 ¿Qué hacer?
-${queHacer}
-
-📍 Información faltante:
-`;
-
-if(faltante.length === 0){
-respuesta += "• Información suficiente para análisis general.";
-}else{
-faltante.forEach(f=>{
-respuesta += "• " + f + "\n";
-});
-}
-
-respuesta += `
-
-⚠️ AVISO LEGAL:
-Uso educativo. No sustituye asesoría legal profesional.
-`;
-
-out.innerText = respuesta;
-
-}
+</body>
+</html>
